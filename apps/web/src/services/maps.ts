@@ -78,11 +78,68 @@ export function getStaticMapUrl(options: StaticMapOptions): string | null {
 }
 
 export async function geocodeAddress(_address: string): Promise<Coordinates | null> {
-  // TODO: integrate Google Maps or Mapbox geocoding.
-  return null;
+  const address = _address.trim();
+  if (!address) return null;
+
+  const provider = (process.env.NEXT_PUBLIC_MAPS_PROVIDER ?? '').toLowerCase();
+  const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY ?? '';
+  if (!apiKey || provider !== 'google') return null;
+
+  const params = new URLSearchParams({
+    address,
+    key: apiKey,
+  });
+
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`
+    );
+    if (!response.ok) return null;
+    const payload = (await response.json()) as {
+      status?: string;
+      results?: Array<{
+        geometry?: { location?: { lat?: number; lng?: number } };
+      }>;
+    };
+
+    if (payload.status !== 'OK' || !payload.results?.length) return null;
+    const location = payload.results[0]?.geometry?.location;
+    if (!location) return null;
+    if (!isValidCoordinate(location.lat ?? NaN)) return null;
+    if (!isValidCoordinate(location.lng ?? NaN)) return null;
+    return { lat: location.lat as number, lng: location.lng as number };
+  } catch {
+    return null;
+  }
 }
 
 export async function reverseGeocode(_coords: Coordinates): Promise<string | null> {
-  // TODO: integrate Google Maps or Mapbox reverse geocoding.
-  return null;
+  if (!isValidCoordinate(_coords.lat) || !isValidCoordinate(_coords.lng)) {
+    return null;
+  }
+
+  const provider = (process.env.NEXT_PUBLIC_MAPS_PROVIDER ?? '').toLowerCase();
+  const apiKey = process.env.NEXT_PUBLIC_MAPS_API_KEY ?? '';
+  if (!apiKey || provider !== 'google') return null;
+
+  const params = new URLSearchParams({
+    latlng: `${_coords.lat},${_coords.lng}`,
+    key: apiKey,
+  });
+
+  try {
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?${params.toString()}`
+    );
+    if (!response.ok) return null;
+    const payload = (await response.json()) as {
+      status?: string;
+      results?: Array<{ formatted_address?: string }>;
+    };
+    if (payload.status !== 'OK' || !payload.results?.length) return null;
+    const address = payload.results[0]?.formatted_address?.trim();
+    return address ? address : null;
+  } catch {
+    return null;
+  }
 }

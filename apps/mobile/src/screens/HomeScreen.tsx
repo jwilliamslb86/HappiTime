@@ -8,7 +8,8 @@ import {
   TextInput,
   RefreshControl,
   Pressable,
-  useWindowDimensions
+  useWindowDimensions,
+  Image
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
@@ -82,6 +83,16 @@ const priceTierFromAveragePrice = (price?: number | null) => {
   if (price <= 20) return 2;
   if (price <= 30) return 3;
   return 4;
+};
+
+const formatMapAddress = (place: HappyHourPlaceWithDistance) => {
+  const parts = [
+    place.address,
+    place.venue_city,
+    place.venue_state,
+    typeof place.venue_zip === "number" ? String(place.venue_zip) : null
+  ].filter(Boolean);
+  return parts.join(", ");
 };
 
 export const HomeScreen: React.FC<Props> = () => {
@@ -194,13 +205,18 @@ export const HomeScreen: React.FC<Props> = () => {
     return list;
   }, [withDistance, query, selectedCuisine, selectedPrice]);
 
-  const cityLabel = useMemo(() => {
+  const cityForMap = useMemo(() => {
     const cityPlace = todaysPlaces.find((place) => place.venue_city);
     const city = cityPlace?.venue_city;
     const state = cityPlace?.venue_state;
     if (city) return `${city}${state ? `, ${state}` : ""}`;
+    return null;
+  }, [todaysPlaces]);
+
+  const cityLabel = useMemo(() => {
+    if (cityForMap) return cityForMap;
     return coords ? "Nearby" : "Set your city";
-  }, [todaysPlaces, coords]);
+  }, [cityForMap, coords]);
 
   const summaryText = useMemo(() => {
     const parts: string[] = ["Today"];
@@ -225,6 +241,49 @@ export const HomeScreen: React.FC<Props> = () => {
       return price ? `${name} - ${price}` : name;
     });
   }, [filtered]);
+
+  const mapMarkerLocations = useMemo(() => {
+    return filtered
+      .map((place) => formatMapAddress(place))
+      .filter((address) => address.length > 0)
+      .slice(0, 4);
+  }, [filtered]);
+
+  const mapImageUrl = useMemo(() => {
+    const provider = (process.env.EXPO_PUBLIC_MAPS_PROVIDER ?? "google").toLowerCase();
+    const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY ?? "";
+    if (!apiKey || provider !== "google") return null;
+
+    const mapWidth = Math.min(640, Math.max(1, Math.floor(width - spacing.lg * 2)));
+    const mapHeight = 240;
+    const center =
+      coords
+        ? `${coords.lat},${coords.lng}`
+        : mapMarkerLocations[0] ?? cityForMap ?? "United States";
+
+    const params = new URLSearchParams({
+      center,
+      zoom: coords ? "13" : "11",
+      size: `${mapWidth}x${mapHeight}`,
+      scale: "2",
+      maptype: "roadmap",
+      key: apiKey
+    });
+
+    if (coords) {
+      params.append(
+        "markers",
+        `color:0x1f2937|label:U|${coords.lat},${coords.lng}`
+      );
+    }
+
+    mapMarkerLocations.forEach((location, index) => {
+      const label = String.fromCharCode(65 + index);
+      params.append("markers", `color:0xf97316|label:${label}|${location}`);
+    });
+
+    return `https://maps.googleapis.com/maps/api/staticmap?${params.toString()}`;
+  }, [cityForMap, coords, mapMarkerLocations, width]);
 
   const cardWidth = Math.min(width - spacing.lg * 2, 300);
 
@@ -349,6 +408,13 @@ export const HomeScreen: React.FC<Props> = () => {
 
         <View style={styles.mapSection}>
           <View style={styles.mapPlaceholder}>
+            {mapImageUrl && (
+              <Image
+                source={{ uri: mapImageUrl }}
+                style={styles.mapImage}
+                resizeMode="cover"
+              />
+            )}
             <View style={styles.mapOverlay}>
               {coords && (
                 <View style={[styles.mapLabel, styles.mapLabelActive, styles.mapLabelCenter]}>
@@ -366,10 +432,11 @@ export const HomeScreen: React.FC<Props> = () => {
                 </View>
               ))}
             </View>
-            <Text style={styles.mapPlaceholderText}>
-              Map view placeholder
-            </Text>
-            {/* TODO: Integrate real map once map provider is available. */}
+            {!mapImageUrl && (
+              <Text style={styles.mapPlaceholderText}>
+                Map view placeholder
+              </Text>
+            )}
           </View>
         </View>
 
@@ -685,6 +752,9 @@ const styles = StyleSheet.create({
   mapPlaceholderText: {
     color: colors.textMuted,
     fontSize: 12
+  },
+  mapImage: {
+    ...StyleSheet.absoluteFillObject
   },
   mapOverlay: {
     ...StyleSheet.absoluteFillObject
