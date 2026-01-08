@@ -7,7 +7,8 @@
     "packages/*"
   ],
   "scripts": {
+    "build:shared": "npm run build --workspace @happitime/shared-types && npm run build --workspace @happitime/shared-api",
     "dev:web": "npm run dev --workspace web",
-    "dev:mobile": "npm run start --workspace mobile"
+    "dev:mobile": "npm run build:shared && npm run start --workspace mobile"
   }
 }
