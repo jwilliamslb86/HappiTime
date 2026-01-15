@@ -17,23 +17,67 @@ create unique index if not exists user_push_tokens_user_token_unique
 
 alter table public.user_push_tokens enable row level security;
 
-create policy "Users can view their push tokens"
-  on public.user_push_tokens
-  for select
-  using (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'user_push_tokens'
+      and policyname = 'Users can view their push tokens'
+  ) then
+    create policy "Users can view their push tokens"
+      on public.user_push_tokens
+      for select
+      using (auth.uid() = user_id);
+  end if;
+end $$;
 
-create policy "Users can insert their push tokens"
-  on public.user_push_tokens
-  for insert
-  with check (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'user_push_tokens'
+      and policyname = 'Users can insert their push tokens'
+  ) then
+    create policy "Users can insert their push tokens"
+      on public.user_push_tokens
+      for insert
+      with check (auth.uid() = user_id);
+  end if;
+end $$;
 
-create policy "Users can update their push tokens"
-  on public.user_push_tokens
-  for update
-  using (auth.uid() = user_id)
-  with check (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'user_push_tokens'
+      and policyname = 'Users can update their push tokens'
+  ) then
+    create policy "Users can update their push tokens"
+      on public.user_push_tokens
+      for update
+      using (auth.uid() = user_id)
+      with check (auth.uid() = user_id);
+  end if;
+end $$;
 
-create policy "Users can delete their push tokens"
-  on public.user_push_tokens
-  for delete
-  using (auth.uid() = user_id);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'user_push_tokens'
+      and policyname = 'Users can delete their push tokens'
+  ) then
+    create policy "Users can delete their push tokens"
+      on public.user_push_tokens
+      for delete
+      using (auth.uid() = user_id);
+  end if;
+end $$;

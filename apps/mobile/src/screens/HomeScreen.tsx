@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
+import Constants from "expo-constants";
 import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -24,6 +25,38 @@ import { distanceMiles } from "../utils/location";
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 type CuisineMode = "tags" | "offers";
+
+const manifestExtra = (
+  Constants.manifest as { extra?: Record<string, unknown> } | undefined
+)?.extra;
+const manifest2Extra = (
+  Constants as { manifest2?: { extra?: Record<string, unknown> } }
+)?.manifest2?.extra;
+const expoExtra =
+  (Constants.expoConfig?.extra as Record<string, unknown> | undefined) ??
+  manifestExtra ??
+  manifest2Extra;
+
+const normalizeEnvValue = (value?: string | null) => {
+  if (!value) return "";
+  const trimmed = value.trim();
+  return trimmed.replace(/^['"]|['"]$/g, "");
+};
+
+const getMapsProvider = () => {
+  const raw =
+    process.env.EXPO_PUBLIC_MAPS_PROVIDER ??
+    (expoExtra?.mapsProvider as string | undefined);
+  const value = normalizeEnvValue(raw);
+  return value ? value.toLowerCase() : "google";
+};
+
+const getMapsApiKey = () => {
+  const raw =
+    process.env.EXPO_PUBLIC_MAPS_API_KEY ??
+    (expoExtra?.mapsApiKey as string | undefined);
+  return normalizeEnvValue(raw);
+};
 
 const formatTagLabel = (tag: string) =>
   tag
@@ -228,8 +261,8 @@ export const HomeScreen: React.FC<Props> = () => {
   }, [filtered]);
 
   const mapImageUrl = useMemo(() => {
-    const provider = (process.env.EXPO_PUBLIC_MAPS_PROVIDER ?? "google").toLowerCase();
-    const apiKey = process.env.EXPO_PUBLIC_MAPS_API_KEY ?? "";
+    const provider = getMapsProvider();
+    const apiKey = getMapsApiKey();
     if (!apiKey || provider !== "google") return null;
 
     const mapWidth = Math.min(640, Math.max(1, Math.floor(width - spacing.lg * 2)));
@@ -889,3 +922,7 @@ const mapLabelPositions = [
   styles.mapLabelPos3,
   styles.mapLabelPos4
 ];
+
+
+
+

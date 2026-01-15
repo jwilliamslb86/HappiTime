@@ -11,6 +11,7 @@ import {
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
 import { useHappyHours } from "../hooks/useHappyHours";
+import { useUserFollowedVenues } from "../hooks/useUserFollowedVenues";
 import { useVenueMenus } from "../hooks/useVenueMenus";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -35,6 +36,12 @@ export const HappyHourDetailScreen: React.FC<Props> = ({
   const { data, loading: windowsLoading, error: windowsError } = useHappyHours();
   const { coords } = useUserLocation();
   const { width } = useWindowDimensions();
+  const {
+    isFollowing,
+    loading: followLoading,
+    savingVenueId,
+    toggleFollow
+  } = useUserFollowedVenues();
 
   const window = useMemo(
     () => data.find((w) => w.id === windowId),
@@ -43,6 +50,7 @@ export const HappyHourDetailScreen: React.FC<Props> = ({
 
   const venue = window?.venue ?? null;
   const venueId = window?.venue_id ?? null;
+  const saved = isFollowing(venueId);
   const { titleText, subtitleText } = getHappyHourDisplayNames(window);
 
   const {
@@ -143,6 +151,11 @@ export const HappyHourDetailScreen: React.FC<Props> = ({
 
   const handleSelect = () => {
     // TODO: hook up to booking or selection flow when available.
+  };
+
+  const handleToggleSave = async () => {
+    if (!venueId || followLoading) return;
+    await toggleFollow(venueId);
   };
 
   return (
@@ -353,6 +366,20 @@ export const HappyHourDetailScreen: React.FC<Props> = ({
         )}
 
         <View style={styles.actions}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.actionButton,
+              pressed && styles.actionButtonPressed,
+              (followLoading || savingVenueId === venueId) &&
+                styles.actionButtonDisabled
+            ]}
+            onPress={handleToggleSave}
+            disabled={followLoading || savingVenueId === venueId}
+          >
+            <Text style={styles.actionText}>
+              {saved ? "Saved" : "Save"}
+            </Text>
+          </Pressable>
           {venue.website && (
             <Pressable
               style={({ pressed }) => [
@@ -631,6 +658,9 @@ const styles = StyleSheet.create({
   },
   actionButtonPressed: {
     opacity: 0.85
+  },
+  actionButtonDisabled: {
+    opacity: 0.6
   },
   actionText: {
     color: colors.pillActiveText,

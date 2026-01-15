@@ -23,7 +23,8 @@
   },
   "devDependencies": {
     "next": "^15.0.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "supabase": "^2.72.7"
   },
   "dependencies": {
     "react": "19.1.0"

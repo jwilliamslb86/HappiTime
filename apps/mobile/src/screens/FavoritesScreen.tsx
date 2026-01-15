@@ -2,11 +2,13 @@
 import React, { useMemo, useState } from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { SegmentedTabs } from "../components/SegmentedTabs";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { HappyHourCard } from "../components/HappyHourCard";
+import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
+import { useUserFollowedVenues } from "../hooks/useUserFollowedVenues";
+import { useUserLocation } from "../hooks/useUserLocation";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
-import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
-import { useUserLocation } from "../hooks/useUserLocation";
-import { HappyHourCard } from "../components/HappyHourCard";
 import { distanceMiles } from "../utils/location";
 
 export const FavoritesScreen: React.FC = () => {
@@ -15,6 +17,8 @@ export const FavoritesScreen: React.FC = () => {
   );
   const { data } = useHappyHours();
   const { coords } = useUserLocation();
+  const { venueIds: followedVenueIds, loading: followedLoading } =
+    useUserFollowedVenues();
 
   // TODO: once you store favorites per user, filter here.
   const favoriteWindows = data;
@@ -34,14 +38,28 @@ export const FavoritesScreen: React.FC = () => {
       };
     });
   }, [favoriteWindows, coords]);
+  const followedVenueSet = useMemo(
+    () => new Set(followedVenueIds),
+    [followedVenueIds]
+  );
+
+  const favoriteOnly = useMemo(() => {
+    if (followedVenueSet.size === 0) return [];
+    return favoritesWithDistance.filter(
+      (window) =>
+        typeof window.venue_id === "string" &&
+        followedVenueSet.has(window.venue_id)
+    );
+  }, [favoritesWithDistance, followedVenueSet]);
+
   const nearbyPlaces = useMemo(() => {
-    const withDistance = favoritesWithDistance.filter(
+    const withDistance = favoriteOnly.filter(
       (place) => typeof place.distance === "number"
     );
     return withDistance
       .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
       .slice(0, 4);
-  }, [favoritesWithDistance]);
+  }, [favoriteOnly]);
 
   return (
     <View style={styles.container}>
@@ -59,9 +77,19 @@ export const FavoritesScreen: React.FC = () => {
 
       {tab === "favorites" && (
         <FlatList
-          data={favoritesWithDistance}
+          data={favoriteOnly}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            followedLoading ? (
+              <LoadingSpinner />
+            ) : (
+              <EmptyState
+                title="No saved venues yet"
+                message="Save a venue from a happy hour detail screen."
+              />
+            )
+          }
           ListFooterComponent={
             nearbyPlaces.length > 0 ? (
               <NearbyList items={nearbyPlaces} />
