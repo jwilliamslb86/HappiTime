@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/build-logic" name="build-logic">
+                <projects>
+                  <project path="$PROJECT_DIR$/build-logic" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/build-logic" />
+            <option value="$PROJECT_DIR$/list" />
+            <option value="$PROJECT_DIR$/utilities" />
+          </set>
+        </option>
+        <option name="resolveExternalAnnotations" value="true" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/@react-native-async-storage/async-storage/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin" />
+            <option value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin" />
+            <option value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin/settings-plugin" />
+            <option value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin/shared" />
+            <option value="$PROJECT_DIR$/node_modules/@react-native/gradle-plugin/shared-testutil" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-application/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-asset/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-constants/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-constants/scripts" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-dev-client/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-dev-launcher/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/expo-dev-launcher/expo-dev-launcher-gradle-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-dev-menu-interface/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-dev-menu/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-device/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-eas-client/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-file-system/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-font/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-json-utils/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-keep-awake/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-linking/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-location/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-manifests/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/android/expo-gradle-plugin" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/android/expo-gradle-plugin" />
+            <option value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin" />
+            <option value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin-shared" />
+            <option value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-settings-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-modules-autolinking/scripts/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-modules-core/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-modules-core/expo-module-gradle-plugin" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/expo-modules-core/expo-module-gradle-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-notifications/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-structured-headers/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-updates-interface/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-updates/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo-updates/expo-updates-gradle-plugin" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/expo-updates/expo-updates-gradle-plugin" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/expo/scripts" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/react-native" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/react-native-safe-area-context/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/node_modules/react-native-safe-area-context/android" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/node_modules/react-native-screens/android" />
+        <option name="gradleHome" value="C:\ProgramData\chocolatey\lib\gradle\tools\gradle-9.0.0" />
+        <option name="gradleJvm" value="#JAVA_HOME" />
+      </GradleProjectSettings>
+    </option>
+    <option name="parallelModelFetch" value="true" />
+  </component>
+</project>

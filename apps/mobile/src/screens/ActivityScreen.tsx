@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, FlatList, Image, Pressable } from "react-native
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SegmentedTabs } from "../components/SegmentedTabs";
-import { useHappyHourPlaces } from "../hooks/useHappyHourPlaces";
+import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
 import type { RootStackParamList } from "../navigation/types";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
@@ -94,71 +94,81 @@ const formatTagLabel = (tag: string) =>
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 
-const splitCuisine = (value: string) =>
+const normalizeTag = (value: string) =>
   value
-    .split(/[,/]/)
-    .map((part) => part.trim().toLowerCase())
-    .filter(Boolean);
+    .replace(/[_-]+/g, " ")
+    .trim()
+    .toLowerCase();
 
-const getPlaceName = (place: any) => place?.venue_name ?? place?.name ?? "Venue";
+const getWindowName = (window: HappyHourWindow) =>
+  window.venue?.name ?? window.venue_name ?? "Venue";
+
+const getWindowTags = (window: HappyHourWindow) =>
+  (window.venue?.tags ?? []).map(normalizeTag).filter(Boolean);
 
 export const ActivityScreen: React.FC = () => {
   const [tab, setTab] = useState<"friends" | "venues" | "lists">("friends");
-  const fetchOptions = useMemo(() => ({ limit: 200 }), []);
-  const { data: places } = useHappyHourPlaces(fetchOptions);
+  const { data: windows } = useHappyHours();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [followState, setFollowState] = useState<Record<string, boolean>>({});
 
   const venuesData = useMemo<ActivityItem[]>(() => {
-    if (!places.length) return MOCK_VENUES;
+    if (!windows.length) return MOCK_VENUES;
 
-    const getPlaceTs = (place: (typeof places)[number]) => {
+    const getWindowTs = (window: HappyHourWindow) => {
       const raw =
-        place.last_confirmed_at ?? place.updated_at ?? place.created_at ?? null;
+        window.last_confirmed_at ??
+        window.updated_at ??
+        window.created_at ??
+        window.venue?.updated_at ??
+        window.venue?.created_at ??
+        null;
       const ts = raw ? Date.parse(raw) : Number.NaN;
       return Number.isNaN(ts) ? 0 : ts;
     };
 
-    const sorted = [...places].sort((a, b) => getPlaceTs(b) - getPlaceTs(a));
+    const sorted = [...windows].sort(
+      (a, b) => getWindowTs(b) - getWindowTs(a)
+    );
 
-    return sorted.map((place) => {
-      const venueName = getPlaceName(place);
-      const message = place.deal_description
-        ? place.deal_description.trim()
-        : "Happy hour updated";
+    return sorted.map((window) => {
+      const venueName = getWindowName(window);
+      const message = window.label ? `${window.label} happy hour` : "Happy hour updated";
       const shortMessage =
         message.length > 72 ? `${message.slice(0, 72)}...` : message;
 
       return {
-        id: `venue-${place.id}`,
+        id: `window-${window.id}`,
         type: "visit",
         actor: venueName,
         when: formatWhen(
-          place.last_confirmed_at ?? place.updated_at ?? place.created_at
+          window.last_confirmed_at ?? window.updated_at ?? window.created_at
         ),
-        message: shortMessage
+        message: shortMessage,
+        windowId: window.id
       };
     });
-  }, [places]);
+  }, [windows]);
 
   const listsData = useMemo<ActivityItem[]>(() => {
-    if (!places.length) return MOCK_LISTS;
+    if (!windows.length) return MOCK_LISTS;
 
     const tagMeta = new Map<
       string,
       { count: number; latest: string | null }
     >();
 
-    for (const place of places) {
-      const cuisines = place.cuisine_type
-        ? splitCuisine(place.cuisine_type)
-        : [];
-      if (cuisines.length === 0) continue;
+    for (const window of windows) {
+      const tags = getWindowTags(window);
+      if (tags.length === 0) continue;
 
-      for (const cuisine of cuisines) {
-        const existing = tagMeta.get(cuisine) ?? { count: 0, latest: null };
+      for (const tag of tags) {
+        const existing = tagMeta.get(tag) ?? { count: 0, latest: null };
         const candidate =
-          place.updated_at ?? place.last_confirmed_at ?? place.created_at ?? null;
+          window.updated_at ??
+          window.last_confirmed_at ??
+          window.created_at ??
+          null;
         const currentTs = existing.latest
           ? Date.parse(existing.latest)
           : Number.NaN;
@@ -173,7 +183,7 @@ export const ActivityScreen: React.FC = () => {
           existing.latest = candidate;
         }
 
-        tagMeta.set(cuisine, existing);
+        tagMeta.set(tag, existing);
       }
     }
 
@@ -192,7 +202,7 @@ export const ActivityScreen: React.FC = () => {
         when: formatWhen(meta.latest),
         message: `${meta.count} venue${meta.count === 1 ? "" : "s"} in this list`
       }));
-  }, [places]);
+  }, [windows]);
 
   let data: ActivityItem[] = [];
   if (tab === "friends") data = MOCK_FRIENDS;

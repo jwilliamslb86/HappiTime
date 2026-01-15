@@ -17,6 +17,7 @@ export const AuthScreen: React.FC = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const redirectTo = Linking.createURL("auth/callback");
 
 const handleEmailContinue = async () => {
   const trimmed = email.trim();
@@ -33,9 +34,8 @@ const handleEmailContinue = async () => {
     console.log("🔐 Starting magic link sign-in…", trimmed);
 
     const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: Linking.createURL("auth/callback") }
-
+      email: trimmed,
+      options: { emailRedirectTo: redirectTo },
     });
 
     console.log("📨 Supabase response:", { data, error });
@@ -68,8 +68,8 @@ const handleEmailContinue = async () => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: "happyhours://auth/callback"
-        }
+          redirectTo,
+        },
       });
 
       if (error) {

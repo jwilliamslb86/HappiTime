@@ -4,30 +4,36 @@ import { View, Text, StyleSheet, FlatList } from "react-native";
 import { SegmentedTabs } from "../components/SegmentedTabs";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
-import {
-  useHappyHourPlaces,
-  type HappyHourPlaceWithDistance
-} from "../hooks/useHappyHourPlaces";
+import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
+import { useUserLocation } from "../hooks/useUserLocation";
 import { HappyHourCard } from "../components/HappyHourCard";
+import { distanceMiles } from "../utils/location";
 
 export const FavoritesScreen: React.FC = () => {
   const [tab, setTab] = useState<"favorites" | "activity" | "history">(
     "favorites"
   );
-  const fetchOptions = useMemo(() => ({ limit: 200 }), []);
-  const { data } = useHappyHourPlaces(fetchOptions);
+  const { data } = useHappyHours();
+  const { coords } = useUserLocation();
 
   // TODO: once you store favorites per user, filter here.
-  const favoritePlaces = data;
+  const favoriteWindows = data;
   // TODO: replace with real history data from Supabase when available.
-  const historyPlaces: typeof favoritePlaces = [];
+  const historyWindows: typeof favoriteWindows = [];
   const favoritesWithDistance = useMemo(() => {
-    return favoritePlaces.map((place) => ({
-      ...place,
-      distance:
-        typeof place.distance_miles === "number" ? place.distance_miles : null
-    }));
-  }, [favoritePlaces]);
+    return favoriteWindows.map((window) => {
+      if (typeof window.distance === "number") return window;
+      const lat = window.venue?.lat ?? null;
+      const lng = window.venue?.lng ?? null;
+      if (!coords || lat == null || lng == null) {
+        return { ...window, distance: null };
+      }
+      return {
+        ...window,
+        distance: distanceMiles(coords.lat, coords.lng, lat, lng)
+      };
+    });
+  }, [favoriteWindows, coords]);
   const nearbyPlaces = useMemo(() => {
     const withDistance = favoritesWithDistance.filter(
       (place) => typeof place.distance === "number"
@@ -75,9 +81,9 @@ export const FavoritesScreen: React.FC = () => {
       )}
 
       {tab === "history" && (
-        historyPlaces.length > 0 ? (
+        historyWindows.length > 0 ? (
           <FlatList
-            data={historyPlaces}
+            data={historyWindows}
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
@@ -98,12 +104,9 @@ export const FavoritesScreen: React.FC = () => {
 const formatPriceTier = (tier?: number | null) =>
   typeof tier === "number" && tier > 0 ? "$".repeat(tier) : null;
 
-const priceTierFromAveragePrice = (price?: number | null) => {
-  if (typeof price !== "number") return null;
-  if (price <= 10) return 1;
-  if (price <= 20) return 2;
-  if (price <= 30) return 3;
-  return 4;
+const getPriceTier = (window: HappyHourWindow) => {
+  const tier = window.venue?.price_tier;
+  return typeof tier === "number" && tier > 0 ? tier : null;
 };
 
 type EmptyStateProps = {
@@ -119,7 +122,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, message }) => (
 );
 
 type NearbyListProps = {
-  items: HappyHourPlaceWithDistance[];
+  items: HappyHourWindow[];
 };
 
 const NearbyList: React.FC<NearbyListProps> = ({ items }) => (
@@ -132,9 +135,9 @@ const NearbyList: React.FC<NearbyListProps> = ({ items }) => (
             ? "<0.1 mi"
             : `${item.distance.toFixed(1)} mi`
           : "Distance unavailable";
-      const venueName = item.venue_name ?? item.name ?? "Venue";
+      const venueName = item.venue?.name ?? item.venue_name ?? "Venue";
       const priceTier =
-        formatPriceTier(priceTierFromAveragePrice(item.average_price)) ?? "$$";
+        formatPriceTier(getPriceTier(item)) ?? "$$";
 
       return (
         <View key={item.id} style={styles.nearbyRow}>

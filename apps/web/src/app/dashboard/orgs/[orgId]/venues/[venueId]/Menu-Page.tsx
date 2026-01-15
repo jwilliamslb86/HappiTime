@@ -27,7 +27,7 @@ const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const HH_STATUS_PUBLISHED = 'published'; // UI check (must match actions.ts + DB constraint)
 
 // replaced invalid reference to `venue` (not defined yet) with a safe helper
-const venueDeepLink = (id?: string) => (id ? `happyhours://venue/${id}` : '');
+const venueDeepLink = (id?: string) => (id ? `happitime://venue/${id}` : '');
 
 type Venue = {
   id: string;

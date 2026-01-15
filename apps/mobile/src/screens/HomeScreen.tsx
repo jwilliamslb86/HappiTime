@@ -13,30 +13,17 @@ import {
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../navigation/types";
-import {
-  useHappyHourPlaces,
-  type HappyHourPlaceWithDistance
-} from "../hooks/useHappyHourPlaces";
+import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorState } from "../components/ErrorState";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
+import { distanceMiles } from "../utils/location";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 type CuisineMode = "tags" | "offers";
-
-const DOW_SHORT = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-const DOW_LONG = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday"
-];
 
 const formatTagLabel = (tag: string) =>
   tag
@@ -62,78 +49,63 @@ const normalizeCuisine = (value: string) =>
     .trim()
     .toLowerCase();
 
-const splitCuisine = (value: string) =>
-  value
-    .split(/[,/]/)
-    .map(normalizeCuisine)
-    .filter(Boolean);
+const getPlaceCuisines = (window: HappyHourWindow) =>
+  (window.venue?.tags ?? []).map(normalizeCuisine).filter(Boolean);
 
-const getPlaceCuisines = (place: HappyHourPlaceWithDistance) =>
-  place.cuisine_type ? splitCuisine(place.cuisine_type) : [];
-
-const getVenueName = (place: HappyHourPlaceWithDistance) =>
-  place.venue_name ?? place.name ?? "Venue";
+const getVenueName = (window: HappyHourWindow) =>
+  window.venue?.name ?? window.venue_name ?? "Venue";
 
 const formatPriceTier = (tier?: number | null) =>
   typeof tier === "number" && tier > 0 ? "$".repeat(tier) : null;
 
-const priceTierFromAveragePrice = (price?: number | null) => {
-  if (typeof price !== "number") return null;
-  if (price <= 10) return 1;
-  if (price <= 20) return 2;
-  if (price <= 30) return 3;
-  return 4;
+const getPriceTier = (window: HappyHourWindow) => {
+  const tier = window.venue?.price_tier;
+  return typeof tier === "number" && tier > 0 ? tier : null;
 };
 
-const formatMapAddress = (place: HappyHourPlaceWithDistance) => {
-  const parts = [
-    place.address,
-    place.venue_city,
-    place.venue_state,
-    typeof place.venue_zip === "number" ? String(place.venue_zip) : null
-  ].filter(Boolean);
+const formatMapAddress = (window: HappyHourWindow) => {
+  const venue = window.venue;
+  if (!venue) return "";
+  const zip = venue.zip == null ? null : String(venue.zip);
+  const parts = [venue.address, venue.city, venue.state, zip].filter(Boolean);
   return parts.join(", ");
 };
 
 export const HomeScreen: React.FC<Props> = () => {
-  const fetchOptions = useMemo(() => ({ limit: 200 }), []);
-  const { data, loading, error, refreshing, refresh } =
-    useHappyHourPlaces(fetchOptions);
+  const { data, loading, error, refreshing, refresh } = useHappyHours();
   const { coords, error: locationError } = useUserLocation();
   const { width } = useWindowDimensions();
 
   const [query, setQuery] = useState("");
   const [selectedCuisine, setSelectedCuisine] = useState("all");
-  const [selectedPrice, setSelectedPrice] = useState<number | "all">("all");
+  const [selectedPrice, setSelectedPrice] = useState<number | "all">("all");    
 
   const todayIndex = new Date().getDay();
 
-  const todaysPlaces = useMemo(() => {
-    const dayShort = DOW_SHORT[todayIndex];
-    const dayLong = DOW_LONG[todayIndex];
+  const getDowValues = (window: HappyHourWindow) => {
+    if (!Array.isArray(window.dow)) return [];
+    return window.dow
+      .map((value) => Number(value))
+      .filter((value) => Number.isFinite(value));
+  };
 
-    return data.filter((place) => {
-      const days = Array.isArray(place.happy_days) ? place.happy_days : [];
-      if (days.length === 0) return false;
-      return days.some((day) => {
-        const normalized = day.trim().toLowerCase();
-        return (
-          normalized === dayShort ||
-          normalized === dayLong ||
-          normalized.startsWith(dayShort)
-        );
-      });
-    });
+  const todaysPlaces = useMemo(() => {
+    return data.filter((window) => getDowValues(window).includes(todayIndex));
   }, [data, todayIndex]);
 
   const withDistance = useMemo(() => {
     return todaysPlaces
-      .map((place) => {
-        const distance =
-          typeof place.distance_miles === "number"
-            ? place.distance_miles
-            : null;
-        return { ...place, distance };
+      .map((window) => {
+        if (typeof window.distance === "number") return window;
+        const lat = window.venue?.lat ?? null;
+        const lng = window.venue?.lng ?? null;
+        if (!coords || lat == null || lng == null) {
+          return { ...window, distance: null };
+        }
+        return {
+          ...window,
+          distance: distanceMiles(coords.lat, coords.lng, lat, lng)
+        };
       })
       .sort((a, b) => {
         if (a.distance == null && b.distance == null) return 0;
@@ -141,7 +113,7 @@ export const HomeScreen: React.FC<Props> = () => {
         if (b.distance == null) return -1;
         return a.distance - b.distance;
       });
-  }, [todaysPlaces]);
+  }, [todaysPlaces, coords]);
 
   const cuisineMeta = useMemo(() => {
     const cuisineSet = new Set<string>();
@@ -162,7 +134,7 @@ export const HomeScreen: React.FC<Props> = () => {
   const priceOptions = useMemo(() => {
     const tiers = new Set<number>();
     for (const place of todaysPlaces) {
-      const tier = priceTierFromAveragePrice(place.average_price);
+      const tier = getPriceTier(place);
       if (typeof tier === "number" && tier > 0) {
         tiers.add(tier);
       }
@@ -176,10 +148,19 @@ export const HomeScreen: React.FC<Props> = () => {
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       list = list.filter((place) => {
-        const name = (place.venue_name ?? place.name ?? "").toLowerCase();
-        const orgName = (place.org_name ?? "").toLowerCase();
-        const neighborhood = (place.neighborhood ?? "").toLowerCase();
-        const address = (place.address ?? "").toLowerCase();
+        const name = (
+          place.venue?.name ??
+          place.venue_name ??
+          ""
+        ).toLowerCase();
+        const orgName = (
+          place.orgName ??
+          place.organization_name ??
+          place.venue?.org_name ??
+          ""
+        ).toLowerCase();
+        const neighborhood = (place.venue?.neighborhood ?? "").toLowerCase();
+        const address = (place.venue?.address ?? "").toLowerCase();
         return (
           name.includes(q) ||
           orgName.includes(q) ||
@@ -197,8 +178,7 @@ export const HomeScreen: React.FC<Props> = () => {
 
     if (selectedPrice !== "all") {
       list = list.filter(
-        (place) =>
-          priceTierFromAveragePrice(place.average_price) === selectedPrice
+        (place) => getPriceTier(place) === selectedPrice
       );
     }
 
@@ -206,9 +186,9 @@ export const HomeScreen: React.FC<Props> = () => {
   }, [withDistance, query, selectedCuisine, selectedPrice]);
 
   const cityForMap = useMemo(() => {
-    const cityPlace = todaysPlaces.find((place) => place.venue_city);
-    const city = cityPlace?.venue_city;
-    const state = cityPlace?.venue_state;
+    const cityPlace = todaysPlaces.find((place) => place.venue?.city);
+    const city = cityPlace?.venue?.city;
+    const state = cityPlace?.venue?.state;
     if (city) return `${city}${state ? `, ${state}` : ""}`;
     return null;
   }, [todaysPlaces]);
@@ -234,9 +214,7 @@ export const HomeScreen: React.FC<Props> = () => {
 
   const mapLabels = useMemo(() => {
     return filtered.slice(0, 4).map((place) => {
-      const price = formatPriceTier(
-        priceTierFromAveragePrice(place.average_price)
-      );
+      const price = formatPriceTier(getPriceTier(place));
       const name = getVenueName(place);
       return price ? `${name} - ${price}` : name;
     });
@@ -493,22 +471,22 @@ const FilterChip: React.FC<ChipProps> = ({ label, selected, onPress }) => (
 );
 
 type VenueCardProps = {
-  place: HappyHourPlaceWithDistance;
+  place: HappyHourWindow;
   width: number;
   onSelect?: () => void;
 };
 
-const VenueCard: React.FC<VenueCardProps> = ({ place, width, onSelect }) => {
+const VenueCard: React.FC<VenueCardProps> = ({ place, width, onSelect }) => {   
   const name = getVenueName(place);
-  const priceTier = formatPriceTier(
-    priceTierFromAveragePrice(place.average_price)
-  );
+  const priceTier = formatPriceTier(getPriceTier(place));
 
   const ratingRaw =
+    (place.venue as any)?.rating ??
     (place as any)?.rating ??
     (place as any)?.avg_rating ??
     null;
   const reviewCountRaw =
+    (place.venue as any)?.review_count ??
     (place as any)?.review_count ??
     (place as any)?.reviews_count ??
     null;
@@ -520,12 +498,7 @@ const VenueCard: React.FC<VenueCardProps> = ({ place, width, onSelect }) => {
     ? Math.round(reviewCountValue)
     : null;
 
-  const distance =
-    typeof place.distance === "number"
-      ? place.distance
-      : typeof place.distance_miles === "number"
-        ? place.distance_miles
-        : null;
+  const distance = typeof place.distance === "number" ? place.distance : null;
   const distanceText =
     distance == null
       ? null

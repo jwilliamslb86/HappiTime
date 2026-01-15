@@ -3,7 +3,7 @@ import * as Linking from "expo-linking";
 import { supabase } from "../api/supabaseClient";
 
 function extractTokens(url: string) {
-  // magic links come as: happyhours://auth/callback#access_token=...&refresh_token=...&...
+  // magic links come as: happitime://auth/callback#access_token=...&refresh_token=...&...
   const hashIndex = url.indexOf("#");
   if (hashIndex === -1) return null;
 
