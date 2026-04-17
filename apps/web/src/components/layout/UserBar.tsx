@@ -20,7 +20,7 @@ export default function UserBar() {
 
   return (
     <div className="row" style={{ justifyContent: 'space-between' }}>
-      <Link href="/dashboard"><strong>HappyHour Client Portal</strong></Link>
+      <Link href="/dashboard" style={{ color: 'var(--brand)', fontSize: 18, fontWeight: 700 }}>HappiTime</Link>
       <div className="row">
         <span className="muted">{email ?? 'Signed in'}</span>
         <button className="secondary" onClick={signOut}>Sign out</button>

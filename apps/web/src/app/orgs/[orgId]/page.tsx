@@ -79,7 +79,7 @@ export default async function OrgPage({
         </div>
 
         {pageError ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Error</strong>
             <div className="muted">{pageError}</div>
           </div>
@@ -113,7 +113,7 @@ export default async function OrgPage({
         <div className="col" style={{ gap: 12 }}>
           <h3 style={{ marginBottom: 0 }}>Venues</h3>
           {venuesErr ? (
-            <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+            <div className="card error">
               <strong>DB error</strong>
               <div className="muted">{venuesErr.message}</div>
             </div>

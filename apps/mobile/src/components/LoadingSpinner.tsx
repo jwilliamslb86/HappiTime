@@ -4,7 +4,7 @@ import { colors } from "../theme/colors";
 
 export const LoadingSpinner: React.FC = () => (
   <View style={styles.container}>
-    <ActivityIndicator size="large" color={colors.text} />
+    <ActivityIndicator size="large" color={colors.primary} />
   </View>
 );
 

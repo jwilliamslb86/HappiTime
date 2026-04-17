@@ -1,12 +1,19 @@
 :root {
   --brand: #E05228;
   --brand-dark: #b83e1a;
+  --text: #111827;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --surface: #f9fafb;
+  --error-border: #fecaca;
+  --error-bg: #fff1f2;
 }
 
 html, body {
   padding: 0;
   margin: 0;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: var(--text);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -19,24 +26,33 @@ a { color: inherit; text-decoration: none; }
 }
 
 .card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 16px;
   background: #fff;
 }
+.card.error {
+  border-color: var(--error-border);
+  background: var(--error-bg);
+}
 
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .col { display: flex; flex-direction: column; gap: 12px; }
-.muted { color: #6b7280; }
+.muted { color: var(--text-muted); }
 
 button {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
-  background: #111827;
+  border: 1px solid var(--border);
+  background: var(--text);
   color: white;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: opacity 0.15s;
 }
+button:hover { opacity: 0.88; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 button.brand {
   background: var(--brand);
   border-color: var(--brand);
@@ -44,16 +60,27 @@ button.brand {
 button.brand:hover {
   background: var(--brand-dark);
   border-color: var(--brand-dark);
+  opacity: 1;
 }
 button.secondary {
   background: #fff;
-  color: #111827;
+  color: var(--text);
 }
+button.secondary:hover { background: var(--surface); opacity: 1; }
+
 input, select, textarea {
   padding: 10px 12px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border);
   width: 100%;
+  font-size: 14px;
+  color: var(--text);
+  background: #fff;
+}
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--brand);
+  outline-offset: 0;
+  border-color: var(--brand);
 }
 input[type="checkbox"],
 input[type="radio"] {
@@ -62,4 +89,18 @@ input[type="radio"] {
   padding: 0;
   flex-shrink: 0;
 }
-hr { border: none; border-top: 1px solid #e5e7eb; }
+input[type="checkbox"]:focus,
+input[type="radio"]:focus {
+  outline: 2px solid var(--brand);
+}
+input[readonly] { background: var(--surface); color: var(--text-muted); }
+
+hr { border: none; border-top: 1px solid var(--border); }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--surface);
+  padding: 2px 5px;
+  border-radius: 4px;
+}

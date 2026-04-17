@@ -100,7 +100,7 @@ export default function VenueMediaUploader(props: { orgId: string; venueId: stri
 
       <div className="col">
         {errorMessage ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Media error</strong>
             <div className="muted">{errorMessage}</div>
           </div>

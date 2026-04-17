@@ -61,7 +61,7 @@ function AppTabs() {
           </View>
         ),
         tabBarActiveTintColor: colors.text,
-        tabBarInactiveTintColor: "#B5B5B5",
+        tabBarInactiveTintColor: colors.tabBarInactiveTint,
         tabBarIcon: ({ color, focused }: { color: string; focused: boolean }) => {
           let name:
             | "house.fill"

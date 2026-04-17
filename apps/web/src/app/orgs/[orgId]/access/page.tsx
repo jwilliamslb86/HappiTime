@@ -97,7 +97,7 @@ export default async function OrgAccessPage({
       <main className="container">
         <div className="col" style={{ gap: 16 }}>
           <UserBar />
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Not authorized</strong>
             <div className="muted">Only organization owners can manage access.</div>
           </div>
@@ -169,7 +169,7 @@ export default async function OrgAccessPage({
         </div>
 
         {errorMessage ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Action failed</strong>
             <div className="muted">{errorMessage}</div>
             {errorDetail ? <div className="muted">Details: {errorDetail}</div> : null}
@@ -255,7 +255,7 @@ export default async function OrgAccessPage({
                   member.role === 'host' || member.role === 'viewer' ? 'host' : 'manager';
 
                 return (
-                  <div key={member.user_id} className="card" style={{ borderColor: '#e5e7eb' }}>
+                  <div key={member.user_id} className="card" >
                     <div className="row" style={{ justifyContent: 'space-between', gap: 12 }}>
                       <div className="col" style={{ gap: 4 }}>
                         <strong>{label}</strong>

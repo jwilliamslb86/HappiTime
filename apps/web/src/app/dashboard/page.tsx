@@ -67,7 +67,7 @@ export default async function DashboardPage({
         </div>
 
         {pageError ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Something went wrong</strong>
             <div className="muted">{pageError}</div>
           </div>
@@ -86,7 +86,7 @@ export default async function DashboardPage({
 
         <div className="col" style={{ gap: 12 }}>
           {error ? (
-            <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+            <div className="card error">
               <strong>DB error</strong>
               <div className="muted">{error.message}</div>
             </div>

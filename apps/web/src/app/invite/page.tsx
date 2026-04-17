@@ -106,14 +106,14 @@ export default async function InvitePage({
         </div>
 
         {errorMessage ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Error</strong>
             <div className="muted">{errorMessage}</div>
           </div>
         ) : null}
 
         {inviteError ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Invite error</strong>
             <div className="muted">{inviteError}</div>
           </div>

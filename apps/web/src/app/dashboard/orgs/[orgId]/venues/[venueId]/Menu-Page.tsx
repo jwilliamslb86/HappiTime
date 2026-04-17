@@ -176,28 +176,28 @@ export default async function VenuePage({
         </div>
 
         {pageError ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Error</strong>
             <div className="muted">{pageError}</div>
           </div>
         ) : null}
 
         {venueErr ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Venue load error</strong>
             <div className="muted">{venueErr.message}</div>
           </div>
         ) : null}
 
         {hhErr ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Happy hour load error</strong>
             <div className="muted">{hhErr.message}</div>
           </div>
         ) : null}
 
         {menusErr ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Menus load error</strong>
             <div className="muted">{menusErr.message}</div>
           </div>
@@ -236,7 +236,7 @@ export default async function VenuePage({
                 const isPublished = (h.status ?? '').toLowerCase() === HH_STATUS_PUBLISHED;
 
                 return (
-                  <div key={h.id} className="card" style={{ background: '#f9fafb' }}>
+                  <div key={h.id} className="card" style={{ background: 'var(--surface)' }}>
                     <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                       <div className="col" style={{ gap: 4 }}>
                         <strong>{formatDays(h.dow)}</strong>
@@ -362,7 +362,7 @@ export default async function VenuePage({
           {(menus as Menu[] | null)?.length ? (
             <div className="col" style={{ gap: 12 }}>
               {(menus as Menu[]).map((m) => (
-                <div key={m.id} className="card" style={{ background: '#f9fafb' }}>
+                <div key={m.id} className="card" style={{ background: 'var(--surface)' }}>
                   {/* Menu edit/delete */}
                   <form className="row" style={{ justifyContent: 'space-between', gap: 10 }}>
                     <input type="hidden" name="menu_id" value={m.id} />
@@ -459,7 +459,7 @@ export default async function VenuePage({
                             {(s.menu_items ?? []).length ? (
                               <div className="col" style={{ gap: 10 }}>
                                 {(s.menu_items ?? []).map((it) => (
-                                  <div key={it.id} className="card" style={{ background: '#fff' }}>
+                                  <div key={it.id} className="card" >
                                     {/* Item edit/delete */}
                                     <form className="col" style={{ gap: 8 }}>
                                       <input type="hidden" name="item_id" value={it.id} />

@@ -32,6 +32,7 @@ export const colors = {
 
   tabBarBackground: "#FFFFFF",
   tabBarBorder: "#111111",
+  tabBarInactiveTint: "#B5B5B5",
 
  
   shadowSoft: "rgba(17, 17, 17, 0.08)"

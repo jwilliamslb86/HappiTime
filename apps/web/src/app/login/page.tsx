@@ -12,13 +12,13 @@ export default async function LoginPage({
   return (
     <main className="container">
       <div className="col" style={{ gap: 18, maxWidth: 520 }}>
-        <h1 style={{ marginBottom: 0 }}>Client Portal Login</h1>
+        <h1 style={{ marginBottom: 0, color: 'var(--brand)' }}>HappiTime</h1>
         <p className="muted" style={{ marginTop: 0 }}>
           Manage venues, happy hour times, menus, pricing, and media.
         </p>
 
         {error ? (
-          <div className="card" style={{ borderColor: '#fecaca', background: '#fff1f2' }}>
+          <div className="card error">
             <strong>Login error</strong>
             <div className="muted">Try again or use a social login.</div>
           </div>
