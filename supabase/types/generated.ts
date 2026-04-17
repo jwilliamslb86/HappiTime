@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json
+          occurred_at: string
+          org_id: string
+          user_id: string | null
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json
+          occurred_at?: string
+          org_id: string
+          user_id?: string | null
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json
+          occurred_at?: string
+          org_id?: string
+          user_id?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       happy_hour_offers: {
         Row: {
           category: string
@@ -79,108 +127,24 @@ export type Database = {
           },
         ]
       }
-      happy_hour_places: {
-        Row: {
-          address: string | null
-          average_price: number | null
-          business_url: string | null
-          created_at: string
-          cuisine_type: string | null
-          deal_description: string | null
-          distance_miles: number | null
-          end_time: string | null
-          happy_days: string[]
-          id: number
-          last_confirmed_at: string | null
-          name: string
-          neighborhood: string | null
-          opening_hours: string | null
-          org_name: string | null
-          org_slug: string | null
-          phone: string | null
-          rating: number | null
-          start_time: string | null
-          status: string
-          updated_at: string
-          venue_city: string | null
-          venue_name: string | null
-          venue_state: string | null
-          venue_zip: number | null
-          website_url: string | null
-        }
-        Insert: {
-          address?: string | null
-          average_price?: number | null
-          business_url?: string | null
-          created_at?: string
-          cuisine_type?: string | null
-          deal_description?: string | null
-          distance_miles?: number | null
-          end_time?: string | null
-          happy_days?: string[]
-          id?: number
-          last_confirmed_at?: string | null
-          name: string
-          neighborhood?: string | null
-          opening_hours?: string | null
-          org_name?: string | null
-          org_slug?: string | null
-          phone?: string | null
-          rating?: number | null
-          start_time?: string | null
-          status?: string
-          updated_at?: string
-          venue_city?: string | null
-          venue_name?: string | null
-          venue_state?: string | null
-          venue_zip?: number | null
-          website_url?: string | null
-        }
-        Update: {
-          address?: string | null
-          average_price?: number | null
-          business_url?: string | null
-          created_at?: string
-          cuisine_type?: string | null
-          deal_description?: string | null
-          distance_miles?: number | null
-          end_time?: string | null
-          happy_days?: string[]
-          id?: number
-          last_confirmed_at?: string | null
-          name?: string
-          neighborhood?: string | null
-          opening_hours?: string | null
-          org_name?: string | null
-          org_slug?: string | null
-          phone?: string | null
-          rating?: number | null
-          start_time?: string | null
-          status?: string
-          updated_at?: string
-          venue_city?: string | null
-          venue_name?: string | null
-          venue_state?: string | null
-          venue_zip?: number | null
-          website_url?: string | null
-        }
-        Relationships: []
-      }
       happy_hour_window_menus: {
         Row: {
           created_at: string
           happy_hour_window_id: string
           menu_id: string
+          updated_at: string
         }
         Insert: {
           created_at?: string
           happy_hour_window_id: string
           menu_id: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           happy_hour_window_id?: string
           menu_id?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -383,42 +347,6 @@ export type Database = {
           },
         ]
       }
-      notion_venue_import: {
-        Row: {
-          Address: string | null
-          "Business URL": string | null
-          "Happy Hour Category": string | null
-          "Happy Hour Details": string | null
-          Name: string | null
-          "Opening Hours": string | null
-          "Phone Number": string | null
-          Rating: number | null
-          "Website URL": string | null
-        }
-        Insert: {
-          Address?: string | null
-          "Business URL"?: string | null
-          "Happy Hour Category"?: string | null
-          "Happy Hour Details"?: string | null
-          Name?: string | null
-          "Opening Hours"?: string | null
-          "Phone Number"?: string | null
-          Rating?: number | null
-          "Website URL"?: string | null
-        }
-        Update: {
-          Address?: string | null
-          "Business URL"?: string | null
-          "Happy Hour Category"?: string | null
-          "Happy Hour Details"?: string | null
-          Name?: string | null
-          "Opening Hours"?: string | null
-          "Phone Number"?: string | null
-          Rating?: number | null
-          "Website URL"?: string | null
-        }
-        Relationships: []
-      }
       org_invites: {
         Row: {
           accepted_at: string | null
@@ -431,6 +359,7 @@ export type Database = {
           org_id: string
           role: string
           token: string
+          updated_at: string
           venue_ids: string[]
         }
         Insert: {
@@ -444,6 +373,7 @@ export type Database = {
           org_id: string
           role: string
           token: string
+          updated_at?: string
           venue_ids?: string[]
         }
         Update: {
@@ -457,6 +387,7 @@ export type Database = {
           org_id?: string
           role?: string
           token?: string
+          updated_at?: string
           venue_ids?: string[]
         }
         Relationships: [
@@ -475,6 +406,7 @@ export type Database = {
           email: string | null
           org_id: string
           role: string
+          updated_at: string
           user_id: string
         }
         Insert: {
@@ -482,6 +414,7 @@ export type Database = {
           email?: string | null
           org_id: string
           role: string
+          updated_at?: string
           user_id: string
         }
         Update: {
@@ -489,6 +422,7 @@ export type Database = {
           email?: string | null
           org_id?: string
           role?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: [
@@ -508,6 +442,7 @@ export type Database = {
           id: string
           name: string
           slug: string | null
+          updated_at: string
         }
         Insert: {
           created_at?: string
@@ -515,6 +450,7 @@ export type Database = {
           id?: string
           name: string
           slug?: string | null
+          updated_at?: string
         }
         Update: {
           created_at?: string
@@ -522,6 +458,251 @@ export type Database = {
           id?: string
           name?: string
           slug?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json
+          user_id: string
+          venue_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json
+          user_id: string
+          venue_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json
+          user_id?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_followed_venues: {
+        Row: {
+          created_at: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_followed_venues_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_user_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_user_id?: string
+        }
+        Relationships: []
+      }
+      user_list_items: {
+        Row: {
+          created_at: string
+          id: string
+          list_id: string
+          notes: string | null
+          sort_order: number
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          list_id: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          list_id?: string
+          notes?: string | null
+          sort_order?: number
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "user_lists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_list_items_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_lists: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          share_slug: string | null
+          share_token: string | null
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          share_slug?: string | null
+          share_token?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          share_slug?: string | null
+          share_token?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          cuisines: string[]
+          home_city: string | null
+          home_lat: number | null
+          home_lng: number | null
+          home_state: string | null
+          max_distance_miles: number | null
+          notifications_marketing: boolean
+          notifications_product: boolean
+          notifications_push: boolean
+          price_tier_max: number | null
+          price_tier_min: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          cuisines?: string[]
+          home_city?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          home_state?: string | null
+          max_distance_miles?: number | null
+          notifications_marketing?: boolean
+          notifications_product?: boolean
+          notifications_push?: boolean
+          price_tier_max?: number | null
+          price_tier_min?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          cuisines?: string[]
+          home_city?: string | null
+          home_lat?: number | null
+          home_lng?: number | null
+          home_state?: string | null
+          max_distance_miles?: number | null
+          notifications_marketing?: boolean
+          notifications_product?: boolean
+          notifications_push?: boolean
+          price_tier_max?: number | null
+          price_tier_min?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          display_name: string | null
+          handle: string | null
+          is_public: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          handle?: string | null
+          is_public?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          display_name?: string | null
+          handle?: string | null
+          is_public?: boolean
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -625,6 +806,7 @@ export type Database = {
           assigned_by: string | null
           created_at: string
           org_id: string
+          updated_at: string
           user_id: string
           venue_id: string
         }
@@ -632,6 +814,7 @@ export type Database = {
           assigned_by?: string | null
           created_at?: string
           org_id: string
+          updated_at?: string
           user_id: string
           venue_id: string
         }
@@ -639,6 +822,7 @@ export type Database = {
           assigned_by?: string | null
           created_at?: string
           org_id?: string
+          updated_at?: string
           user_id?: string
           venue_id?: string
         }
@@ -665,6 +849,13 @@ export type Database = {
           app_name_preference: string
           city: string
           created_at: string
+          geocode_attempts: number
+          geocode_last_attempt_at: string | null
+          geocode_last_error: string | null
+          geocode_next_attempt_at: string | null
+          geocode_requested_at: string | null
+          geocode_status: string
+          geocoded_at: string | null
           id: string
           last_confirmed_at: string | null
           lat: number | null
@@ -674,21 +865,36 @@ export type Database = {
           org_id: string
           org_name: string | null
           phone: string | null
+          places_attempts: number
+          places_id: string | null
+          places_last_error: string | null
+          places_last_synced_at: string | null
+          places_next_sync_at: string | null
+          places_status: string
           price_tier: number | null
           published_at: string | null
+          rating: number | null
+          review_count: number | null
           state: string
           status: string
           tags: string[]
           timezone: string | null
           updated_at: string
           website: string | null
-          zip: number
+          zip: string
         }
         Insert: {
           address?: string | null
           app_name_preference?: string
           city: string
           created_at?: string
+          geocode_attempts?: number
+          geocode_last_attempt_at?: string | null
+          geocode_last_error?: string | null
+          geocode_next_attempt_at?: string | null
+          geocode_requested_at?: string | null
+          geocode_status?: string
+          geocoded_at?: string | null
           id?: string
           last_confirmed_at?: string | null
           lat?: number | null
@@ -698,21 +904,36 @@ export type Database = {
           org_id: string
           org_name?: string | null
           phone?: string | null
+          places_attempts?: number
+          places_id?: string | null
+          places_last_error?: string | null
+          places_last_synced_at?: string | null
+          places_next_sync_at?: string | null
+          places_status?: string
           price_tier?: number | null
           published_at?: string | null
+          rating?: number | null
+          review_count?: number | null
           state: string
           status?: string
           tags?: string[]
           timezone?: string | null
           updated_at?: string
           website?: string | null
-          zip: number
+          zip: string
         }
         Update: {
           address?: string | null
           app_name_preference?: string
           city?: string
           created_at?: string
+          geocode_attempts?: number
+          geocode_last_attempt_at?: string | null
+          geocode_last_error?: string | null
+          geocode_next_attempt_at?: string | null
+          geocode_requested_at?: string | null
+          geocode_status?: string
+          geocoded_at?: string | null
           id?: string
           last_confirmed_at?: string | null
           lat?: number | null
@@ -722,15 +943,23 @@ export type Database = {
           org_id?: string
           org_name?: string | null
           phone?: string | null
+          places_attempts?: number
+          places_id?: string | null
+          places_last_error?: string | null
+          places_last_synced_at?: string | null
+          places_next_sync_at?: string | null
+          places_status?: string
           price_tier?: number | null
           published_at?: string | null
+          rating?: number | null
+          review_count?: number | null
           state?: string
           status?: string
           tags?: string[]
           timezone?: string | null
           updated_at?: string
           website?: string | null
-          zip?: number
+          zip?: string
         }
         Relationships: [
           {
@@ -744,35 +973,6 @@ export type Database = {
       }
     }
     Views: {
-      organization_members: {
-        Row: {
-          created_at: string | null
-          organization_id: string | null
-          role: string | null
-          user_id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          organization_id?: string | null
-          role?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          organization_id?: string | null
-          role?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "org_members_org_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       published_happy_hour_windows: {
         Row: {
           created_at: string | null
@@ -853,11 +1053,46 @@ export type Database = {
           },
         ]
       }
+      venue_event_counts: {
+        Row: {
+          cnt: number | null
+          event_type: string | null
+          org_id: string | null
+          venue_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       create_organization: { Args: { p_name: string }; Returns: string }
+      get_geocode_job_token: { Args: never; Returns: string }
+      get_places_job_token: { Args: never; Returns: string }
+      get_venue_follower_user_stats: {
+        Args: { p_venue_id: string }
+        Returns: {
+          follower_count: number
+          user_id: string
+        }[]
+      }
       has_venue_assignment: { Args: { p_venue_id: string }; Returns: boolean }
       hh_days_from_text: { Args: { s: string }; Returns: string[] }
+      invoke_geocode_venues: { Args: never; Returns: undefined }
+      invoke_places_import: { Args: never; Returns: undefined }
       is_org_host: { Args: { p_org_id: string }; Returns: boolean }
       is_org_manager: { Args: { p_org_id: string }; Returns: boolean }
       is_org_member: { Args: { p_org_id: string }; Returns: boolean }
