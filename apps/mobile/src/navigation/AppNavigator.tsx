@@ -13,6 +13,7 @@ import { FavoritesScreen } from "../screens/FavoritesScreen";
 import { HappyHourDetailScreen } from "../screens/HappyHourDetailScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { VenuePreviewScreen } from "../screens/VenuePreviewScreen";
 import { colors } from "../theme/colors";
 import type { MainTabParamList, RootStackParamList } from "./types";
 
@@ -87,10 +88,6 @@ function AppTabs() {
       <Tab.Screen
         name="Activity"
         component={ActivityScreen}
-        options={{
-          tabBarBadge: 5,
-          tabBarBadgeStyle: styles.tabBarBadge
-        }}
       />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
@@ -116,6 +113,16 @@ export function AppNavigator() {
             headerStyle: { backgroundColor: colors.background }
           }}
         />
+        <Stack.Screen
+          name="VenuePreview"
+          component={VenuePreviewScreen}
+          options={{
+            headerShown: true,
+            title: "Venue Preview",
+            headerTintColor: colors.text,
+            headerStyle: { backgroundColor: colors.background }
+          }}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -135,15 +142,4 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: colors.text
   },
-  tabBarBadge: {
-    backgroundColor: colors.error,
-    color: colors.surface,
-    fontSize: 11,
-    fontWeight: "600",
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    lineHeight: 18,
-    textAlign: "center"
-  }
 });

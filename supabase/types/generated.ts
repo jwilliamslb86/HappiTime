@@ -347,6 +347,48 @@ export type Database = {
           },
         ]
       }
+      notion_venue_import: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          id: string
+          name: string
+          notion_id: string
+          org_id: string | null
+          state: string | null
+          status: string
+          updated_at: string
+          venue_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notion_id: string
+          org_id?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notion_id?: string
+          org_id?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Relationships: []
+      }
       org_invites: {
         Row: {
           accepted_at: string | null
@@ -539,7 +581,22 @@ export type Database = {
           follower_id?: string
           following_user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_follows_follower_id_profile_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_follows_following_user_id_profile_fkey"
+            columns: ["following_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       user_list_items: {
         Row: {

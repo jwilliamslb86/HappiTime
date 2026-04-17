@@ -5,6 +5,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { SegmentedTabs } from "../components/SegmentedTabs";
 import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
+import { useUserFollowers } from "../hooks/useUserFollowers";
 import type { RootStackParamList } from "../navigation/types";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
@@ -109,8 +110,27 @@ const getWindowTags = (window: HappyHourWindow) =>
 export const ActivityScreen: React.FC = () => {
   const [tab, setTab] = useState<"friends" | "venues" | "lists">("friends");
   const { data: windows } = useHappyHours();
+  const { followers, loading: followersLoading, toggleFollow } = useUserFollowers();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [followState, setFollowState] = useState<Record<string, boolean>>({});
+  const [followingBack, setFollowingBack] = useState<Record<string, boolean>>({});
+
+  const friendsData = useMemo<ActivityItem[]>(() => {
+    return followers.map((f) => {
+      const name =
+        f.profile?.display_name ??
+        f.profile?.handle ??
+        f.follower_id.slice(0, 8);
+      return {
+        id: f.follower_id,
+        type: "follow",
+        actor: name,
+        avatarUrl: f.profile?.avatar_url ?? undefined,
+        when: formatWhen(f.created_at),
+        message: "Follows you",
+        unread: false,
+      };
+    });
+  }, [followers]);
 
   const venuesData = useMemo<ActivityItem[]>(() => {
     if (!windows.length) return MOCK_VENUES;
@@ -205,7 +225,7 @@ export const ActivityScreen: React.FC = () => {
   }, [windows]);
 
   let data: ActivityItem[] = [];
-  if (tab === "friends") data = MOCK_FRIENDS;
+  if (tab === "friends") data = friendsData;
   if (tab === "venues") data = venuesData;
   if (tab === "lists") data = listsData;
 
@@ -223,10 +243,20 @@ export const ActivityScreen: React.FC = () => {
       />
 
       <FlatList
-        data={data}
+        data={tab === "friends" && followersLoading ? [] : data}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          tab === "friends" && !followersLoading ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>No followers yet</Text>
+              <Text style={styles.emptyText}>
+                When someone follows you, they'll appear here.
+              </Text>
+            </View>
+          ) : null
+        }
         renderItem={({ item }) => {
           const onPress = item.windowId
             ? () =>
@@ -236,14 +266,11 @@ export const ActivityScreen: React.FC = () => {
             : undefined;
           const isUnread = item.unread === true;
           const isFollowItem = item.type === "follow";
-          const isFollowing = followState[item.id] ?? false;
+          const isFollowing = followingBack[item.id] ?? false;
 
           const handleFollowToggle = () => {
-            setFollowState((prev) => ({
-              ...prev,
-              [item.id]: !isFollowing
-            }));
-            // TODO: hook up to follow/unfollow API and handle loading/errors.
+            setFollowingBack((prev) => ({ ...prev, [item.id]: !isFollowing }));
+            void toggleFollow(item.id, isFollowing);
           };
 
           return (
@@ -441,6 +468,21 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     opacity: 0.6,
     marginLeft: 56
+  },
+  emptyState: {
+    paddingTop: spacing.xl,
+    alignItems: "center"
+  },
+  emptyTitle: {
+    color: colors.text,
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: spacing.xs
+  },
+  emptyText: {
+    color: colors.textMuted,
+    fontSize: 13,
+    textAlign: "center"
   }
 });
 

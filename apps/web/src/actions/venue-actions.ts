@@ -68,6 +68,30 @@ async function requireAuth() {
   return { supabase, userId: auth.user.id };
 }
 
+async function requireVenueAccess(orgId: string, venueId: string) {
+  const { supabase, userId } = await requireAuth();
+
+  const { data: membership } = await supabase
+    .from('org_members')
+    .select('role')
+    .eq('org_id', orgId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!membership) redirectWithError(orgId, venueId, 'not_authorized');
+
+  const { data: venue } = await supabase
+    .from('venues')
+    .select('id')
+    .eq('id', venueId)
+    .eq('org_id', orgId)
+    .maybeSingle();
+
+  if (!venue) redirectWithError(orgId, venueId, 'not_authorized');
+
+  return { supabase, userId };
+}
+
 function revalidateVenue(orgId: string, venueId: string) {
   revalidatePath(`/orgs/${orgId}/venues/${venueId}`);
 }
@@ -460,10 +484,20 @@ export async function createSection(orgId: string, venueId: string, formData: Fo
 }
 
 export async function updateSection(orgId: string, venueId: string, formData: FormData) {
-  const { supabase } = await requireAuth();
+  const { supabase } = await requireVenueAccess(orgId, venueId);
 
   const section_id = requireField(formData, 'section_id', orgId, venueId, 'missing_section_fields');
   const name = requireField(formData, 'section_name', orgId, venueId, 'missing_section_fields');
+
+  // Verify section belongs to a menu owned by this venue
+  const { data: section } = await supabase
+    .from('menu_sections')
+    .select('id, menus!inner(venue_id)')
+    .eq('id', section_id)
+    .eq('menus.venue_id', venueId)
+    .maybeSingle();
+
+  if (!section) redirectWithError(orgId, venueId, 'not_authorized');
 
   const { error } = await supabase
     .from('menu_sections')
@@ -479,9 +513,19 @@ export async function updateSection(orgId: string, venueId: string, formData: Fo
 }
 
 export async function deleteSection(orgId: string, venueId: string, formData: FormData) {
-  const { supabase } = await requireAuth();
+  const { supabase } = await requireVenueAccess(orgId, venueId);
 
   const section_id = requireField(formData, 'section_id', orgId, venueId, 'missing_section_id');
+
+  // Verify section belongs to a menu owned by this venue
+  const { data: section } = await supabase
+    .from('menu_sections')
+    .select('id, menus!inner(venue_id)')
+    .eq('id', section_id)
+    .eq('menus.venue_id', venueId)
+    .maybeSingle();
+
+  if (!section) redirectWithError(orgId, venueId, 'not_authorized');
 
   await supabase.from('menu_items').delete().eq('section_id', section_id);
 
@@ -526,7 +570,7 @@ export async function createItem(orgId: string, venueId: string, formData: FormD
 }
 
 export async function updateItem(orgId: string, venueId: string, formData: FormData) {
-  const { supabase } = await requireAuth();
+  const { supabase } = await requireVenueAccess(orgId, venueId);
 
   const item_id = requireField(formData, 'item_id', orgId, venueId, 'missing_item_fields');
   const name = toStr(formData.get('item_name'));
@@ -535,6 +579,16 @@ export async function updateItem(orgId: string, venueId: string, formData: FormD
   const is_happy_hour = formData.get('item_is_happy_hour') === 'on';
 
   if (!name) redirectWithError(orgId, venueId, 'missing_item_fields');
+
+  // Verify item traces back to this venue via section → menu
+  const { data: item } = await supabase
+    .from('menu_items')
+    .select('id, menu_sections!inner(menu_id, menus!inner(venue_id))')
+    .eq('id', item_id)
+    .eq('menu_sections.menus.venue_id', venueId)
+    .maybeSingle();
+
+  if (!item) redirectWithError(orgId, venueId, 'not_authorized');
 
   const { error } = await supabase
     .from('menu_items')
@@ -550,9 +604,19 @@ export async function updateItem(orgId: string, venueId: string, formData: FormD
 }
 
 export async function deleteItem(orgId: string, venueId: string, formData: FormData) {
-  const { supabase } = await requireAuth();
+  const { supabase } = await requireVenueAccess(orgId, venueId);
 
   const item_id = requireField(formData, 'item_id', orgId, venueId, 'missing_item_id');
+
+  // Verify item traces back to this venue via section → menu
+  const { data: item } = await supabase
+    .from('menu_items')
+    .select('id, menu_sections!inner(menu_id, menus!inner(venue_id))')
+    .eq('id', item_id)
+    .eq('menu_sections.menus.venue_id', venueId)
+    .maybeSingle();
+
+  if (!item) redirectWithError(orgId, venueId, 'not_authorized');
 
   const { error } = await supabase.from('menu_items').delete().eq('id', item_id);
 

@@ -3,7 +3,6 @@ import { fetchPublishedHappyHourWindows } from "@happitime/shared-api";
 import type {
   HappyHourOffer,
   HappyHourWindow as HappyHourWindowRow,
-  Organization,
   Venue
 } from "@happitime/shared-types";
 import { useCallback, useEffect, useState } from "react";
@@ -117,55 +116,31 @@ export function useHappyHours() {
         return fallbackVenue ? { ...window, venue: fallbackVenue } : window;
       });
 
+      // Build org venue counts from the data we already have (no extra query needed)
       const orgVenueMap = new Map<string, Set<string>>();
-
       for (const window of windowsWithVenues) {
         const orgId = getOrgId(window);
         const venueId = getVenueId(window);
-
         if (!orgId || !venueId) continue;
-
         const venues = orgVenueMap.get(orgId) ?? new Set<string>();
         venues.add(venueId);
         orgVenueMap.set(orgId, venues);
       }
-
       const orgVenueCounts = new Map<string, number>();
-      const orgIdsToFetch = Array.from(orgVenueMap.keys());
-
       for (const [orgId, venues] of orgVenueMap.entries()) {
         orgVenueCounts.set(orgId, venues.size);
-      }
-
-      let orgNameById: Record<string, string> = {};
-
-      if (orgIdsToFetch.length > 0) {
-        const { data: orgData, error: orgError } = await supabase
-          .from("organizations")
-          .select("id, name")
-          .in("id", orgIdsToFetch);
-
-        if (orgError) {
-          console.warn("[useHappyHours] organization lookup failed", orgError);
-        } else {
-          orgNameById = Object.fromEntries(
-            ((orgData ?? []) as Organization[]).map((org) => [
-              org.id,
-              org.name
-            ])
-          );
-        }
       }
 
       const windowsWithOrgMeta = windowsWithVenues.map((window) => {
         const orgId = getOrgId(window);
         const orgVenueCount = orgId ? orgVenueCounts.get(orgId) ?? null : null;
-        const orgNameFromLookup = orgId ? orgNameById[orgId] ?? null : null;
+        // org name now comes from the nested join (venue.org.name) — no extra round-trip
+        const orgNameFromJoin = (window.venue as any)?.org?.name ?? null;
         const orgNameFromVenue = normalizeText(window.venue?.org_name);
         const organizationName =
           normalizeText(window.organization_name) ??
           orgNameFromVenue ??
-          orgNameFromLookup;
+          normalizeText(orgNameFromJoin);
         const venueName =
           normalizeText(window.venue_name) ?? window.venue?.name ?? null;
 

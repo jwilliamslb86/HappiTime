@@ -11,7 +11,6 @@ export type Venue = Database["public"]["Tables"]["venues"]["Row"];
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 export type HappyHourWindow = Database["public"]["Tables"]["happy_hour_windows"]["Row"];
 export type HappyHourOffer = Database["public"]["Tables"]["happy_hour_offers"]["Row"];
-export type HappyHourPlace = Database["public"]["Tables"]["happy_hour_places"]["Row"];
 export type Menu = Database["public"]["Tables"]["menus"]["Row"];
 export type MenuSection = Database["public"]["Tables"]["menu_sections"]["Row"];
 export type MenuItem = Database["public"]["Tables"]["menu_items"]["Row"];

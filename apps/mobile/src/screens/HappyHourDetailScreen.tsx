@@ -70,16 +70,8 @@ export const HappyHourDetailScreen: React.FC<Props> = ({
     return distanceMiles(coords.lat, coords.lng, lat, lng);
   }, [coords, venue]);
 
-  const ratingRaw =
-    (venue as any)?.rating ??
-    (venue as any)?.avg_rating ??
-    (window as any)?.rating ??
-    null;
-  const reviewCountRaw =
-    (venue as any)?.review_count ??
-    (venue as any)?.reviews_count ??
-    (window as any)?.review_count ??
-    null;
+  const ratingRaw = venue?.rating ?? null;
+  const reviewCountRaw = venue?.review_count ?? null;
 
   const ratingValue = Number(ratingRaw);
   const reviewCountValue = Number(reviewCountRaw);

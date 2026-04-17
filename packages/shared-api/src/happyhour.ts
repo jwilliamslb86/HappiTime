@@ -3,7 +3,6 @@
 import type { PostgrestError, SupabaseClient } from "@supabase/supabase-js";
 import type {
   Database,
-  HappyHourPlace,
   Organization,
   Venue,
   HappyHourWindow,
@@ -20,121 +19,12 @@ export type VenueWithOrganization = Venue & {
   org?: Organization | null;
 };
 
-export type HappyHourPlaceStatus =
-  | "draft"
-  | "pending_review"
-  | "verified"
-  | "paused"
-  | "expired";
-
-export type FetchHappyHourPlacesOptions = {
-  supabase?: SupabaseClient<Database>;
-  limit?: number;
-  offset?: number;
-  status?: HappyHourPlaceStatus;
-  statuses?: HappyHourPlaceStatus[];
-  search?: string;
-  day?: string;
-  days?: string[];
-  cuisineTypes?: string[];
-  minPrice?: number;
-  maxPrice?: number;
-  minDistance?: number;
-  maxDistance?: number;
-  orderBy?: keyof HappyHourPlace;
-  ascending?: boolean;
-};
-
 type FetchVenueWithWindowsOptions = {
   supabase?: SupabaseClient<Database>;
   orgId?: string;
   includeOrganization?: boolean;
   status?: string;
 };
-
-/**
- * Fetch "flattened" happy hour places from public.happy_hour_places.
- */
-export async function fetchHappyHourPlaces(
-  opts?: FetchHappyHourPlacesOptions
-): Promise<HappyHourPlace[]> {
-  const supabase = opts?.supabase ?? createSupabaseClient();
-
-  const orderBy = opts?.orderBy ?? "distance_miles";
-  const ascending = opts?.ascending ?? true;
-
-  let query = supabase
-    .from("happy_hour_places")
-    .select("*")
-    .order(orderBy, { ascending });
-
-  if (opts?.statuses?.length) {
-    query = query.in("status", opts.statuses);
-  } else if (opts?.status) {
-    query = query.eq("status", opts.status);
-  }
-
-  const search = opts?.search?.trim();
-  if (search) {
-    const pattern = `%${search}%`;
-    query = query.or(
-      [
-        `name.ilike.${pattern}`,
-        `venue_name.ilike.${pattern}`,
-        `org_name.ilike.${pattern}`,
-        `address.ilike.${pattern}`,
-        `neighborhood.ilike.${pattern}`
-      ].join(",")
-    );
-  }
-
-  if (opts?.days?.length) {
-    query = query.overlaps("happy_days", opts.days);
-  } else if (opts?.day) {
-    query = query.contains("happy_days", [opts.day]);
-  }
-
-  if (opts?.cuisineTypes?.length) {
-    query = query.in("cuisine_type", opts.cuisineTypes);
-  }
-
-  if (typeof opts?.minPrice === "number") {
-    query = query.gte("average_price", opts.minPrice);
-  }
-
-  if (typeof opts?.maxPrice === "number") {
-    query = query.lte("average_price", opts.maxPrice);
-  }
-
-  if (typeof opts?.minDistance === "number") {
-    query = query.gte("distance_miles", opts.minDistance);
-  }
-
-  if (typeof opts?.maxDistance === "number") {
-    query = query.lte("distance_miles", opts.maxDistance);
-  }
-
-  const limit = opts?.limit;
-  const offset = opts?.offset;
-
-  if (typeof limit === "number" && typeof offset === "number") {
-    query = query.range(offset, offset + Math.max(0, limit - 1));
-  } else if (typeof limit === "number") {
-    query = query.limit(limit);
-  } else if (typeof offset === "number") {
-    const fallbackLimit = 50;
-    query = query.range(offset, offset + fallbackLimit - 1);
-  }
-
-  const { data, error } = await query;
-
-  if (error) {
-    console.error("fetchHappyHourPlaces error:", error);
-    throw error;
-  }
-
-  return data ?? [];
-}
 
 /**
  * Fetch published happy hour windows with venue + offer details.
@@ -147,7 +37,7 @@ export async function fetchPublishedHappyHourWindows(opts?: {
 
   let query = supabase
     .from("happy_hour_windows")
-    .select("*, venue:venues (*), offers:happy_hour_offers (*)")
+    .select("*, venue:venues (*, org:organizations (id, name)), offers:happy_hour_offers (*)")
     .eq("status", "published")
     .order("start_time", { ascending: true });
 

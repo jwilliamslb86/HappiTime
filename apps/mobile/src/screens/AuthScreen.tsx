@@ -166,8 +166,20 @@ const handleEmailContinue = async () => {
 
         <Text style={styles.legalText}>
           By clicking continue, you agree to our{" "}
-          <Text style={styles.linkText}>Terms of Service</Text> and{" "}
-          <Text style={styles.linkText}>Privacy Policy</Text>.
+          <Text
+            style={styles.linkText}
+            onPress={() => Linking.openURL("https://happitime.app/terms")}
+          >
+            Terms of Service
+          </Text>{" "}
+          and{" "}
+          <Text
+            style={styles.linkText}
+            onPress={() => Linking.openURL("https://happitime.app/privacy")}
+          >
+            Privacy Policy
+          </Text>
+          .
         </Text>
       </View>
     </View>

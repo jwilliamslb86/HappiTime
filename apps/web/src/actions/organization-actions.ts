@@ -9,8 +9,6 @@ export async function createVenue(orgId: string, formData: FormData) {
   if (!name) redirect(`/orgs/${orgId}?error=missing_venue_name`);
 
   const supabase = await createClient();
-  const { data: who, error: whoErr } = await supabase.rpc("whoami");
-  console.log("WHOAMI:", who, whoErr);
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) redirect('/login');
   const { data: membership, error: membershipErr } = await supabase

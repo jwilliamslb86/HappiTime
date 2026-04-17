@@ -10,11 +10,6 @@ export async function fetchPublishedHappyHours(): Promise<HappyHourWindow[]> {
   try {
     const windows = await fetchPublishedHappyHourWindows({ supabase });
 
-    console.log(
-      "[fetchPublishedHappyHours] raw data:",
-      JSON.stringify(windows, null, 2)
-    );
-
     return windows.map((window) => ({
       ...window,
       offers: (window.offers ?? []).filter(

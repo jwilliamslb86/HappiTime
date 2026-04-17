@@ -16,6 +16,7 @@ import type { RootStackParamList } from "../navigation/types";
 import Constants from "expo-constants";
 import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
 import { useUserLocation } from "../hooks/useUserLocation";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { ErrorState } from "../components/ErrorState";
 import { colors } from "../theme/colors";
@@ -104,14 +105,22 @@ const formatMapAddress = (window: HappyHourWindow) => {
   return parts.join(", ");
 };
 
-export const HomeScreen: React.FC<Props> = () => {
+export const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { data, loading, error, refreshing, refresh } = useHappyHours();
   const { coords, error: locationError } = useUserLocation();
+  const { preferences } = useUserPreferences();
   const { width } = useWindowDimensions();
 
   const [query, setQuery] = useState("");
   const [selectedCuisine, setSelectedCuisine] = useState("all");
-  const [selectedPrice, setSelectedPrice] = useState<number | "all">("all");    
+  const [selectedPrice, setSelectedPrice] = useState<number | "all">("all");
+
+  // Apply preference defaults once loaded
+  React.useEffect(() => {
+    if (preferences.price_tier_min != null) {
+      setSelectedPrice(preferences.price_tier_min);
+    }
+  }, [preferences.price_tier_min]);    
 
   const todayIndex = new Date().getDay();
 
@@ -473,6 +482,9 @@ export const HomeScreen: React.FC<Props> = () => {
                 key={item.id}
                 place={item}
                 width={cardWidth}
+                onSelect={() =>
+                  navigation.navigate("HappyHourDetail", { windowId: item.id })
+                }
               />
             ))}
           </ScrollView>
@@ -513,16 +525,8 @@ const VenueCard: React.FC<VenueCardProps> = ({ place, width, onSelect }) => {
   const name = getVenueName(place);
   const priceTier = formatPriceTier(getPriceTier(place));
 
-  const ratingRaw =
-    (place.venue as any)?.rating ??
-    (place as any)?.rating ??
-    (place as any)?.avg_rating ??
-    null;
-  const reviewCountRaw =
-    (place.venue as any)?.review_count ??
-    (place as any)?.review_count ??
-    (place as any)?.reviews_count ??
-    null;
+  const ratingRaw = place.venue?.rating ?? null;
+  const reviewCountRaw = place.venue?.review_count ?? null;
 
   const ratingValue = Number(ratingRaw);
   const reviewCountValue = Number(reviewCountRaw);

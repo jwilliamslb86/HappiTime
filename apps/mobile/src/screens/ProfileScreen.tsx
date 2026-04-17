@@ -1,10 +1,12 @@
 // src/screens/ProfileScreen.tsx
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from "react-native";
+import { supabase } from "../api/supabaseClient";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useUserFollowCounts } from "../hooks/useUserFollowCounts";
 import { useUserFollowedVenues } from "../hooks/useUserFollowedVenues";
+import { useUserPreferences } from "../hooks/useUserPreferences";
 import { useUserProfile } from "../hooks/useUserProfile";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
@@ -20,12 +22,32 @@ export const ProfileScreen: React.FC = () => {
   const { followerCount, followingCount, loading: countsLoading } =
     useUserFollowCounts();
   const { venueIds, loading: venuesLoading } = useUserFollowedVenues();
+  const {
+    preferences,
+    saving: prefSaving,
+    savePreferences,
+  } = useUserPreferences();
 
   const [displayName, setDisplayName] = useState("");
+  const [homeCity, setHomeCity] = useState("");
+  const [homeState, setHomeState] = useState("");
+  const [notifPush, setNotifPush] = useState(true);
+  const [notifProduct, setNotifProduct] = useState(true);
   const [handle, setHandle] = useState("");
   const [bio, setBio] = useState("");
   const [isPublic, setIsPublic] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+
+  const handleSignOut = () => {
+    Alert.alert("Sign out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Sign out",
+        style: "destructive",
+        onPress: () => supabase.auth.signOut()
+      }
+    ]);
+  };
 
   useEffect(() => {
     if (!profile) return;
@@ -34,6 +56,13 @@ export const ProfileScreen: React.FC = () => {
     setBio(profile.bio ?? "");
     setIsPublic(profile.is_public);
   }, [profile]);
+
+  useEffect(() => {
+    setHomeCity(preferences.home_city ?? "");
+    setHomeState(preferences.home_state ?? "");
+    setNotifPush(preferences.notifications_push);
+    setNotifProduct(preferences.notifications_product);
+  }, [preferences]);
 
   const handleSave = async () => {
     setStatusMessage(null);
@@ -127,6 +156,78 @@ export const ProfileScreen: React.FC = () => {
           <Text style={styles.statusMessage}>{statusMessage}</Text>
         ) : null}
       </View>
+
+      <View style={styles.card}>
+        <Text style={styles.sectionTitle}>Preferences</Text>
+
+        <Text style={styles.label}>Home city</Text>
+        <View style={styles.cityRow}>
+          <TextInput
+            style={[styles.input, styles.cityInput]}
+            placeholder="City"
+            placeholderTextColor={colors.textMuted}
+            value={homeCity}
+            onChangeText={setHomeCity}
+          />
+          <TextInput
+            style={[styles.input, styles.stateInput]}
+            placeholder="ST"
+            placeholderTextColor={colors.textMuted}
+            value={homeState}
+            onChangeText={setHomeState}
+            autoCapitalize="characters"
+            maxLength={2}
+          />
+        </View>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>Push notifications</Text>
+          <Switch
+            value={notifPush}
+            onValueChange={setNotifPush}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={colors.background}
+          />
+        </View>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>Product updates</Text>
+          <Switch
+            value={notifProduct}
+            onValueChange={setNotifProduct}
+            trackColor={{ false: colors.border, true: colors.primary }}
+            thumbColor={colors.background}
+          />
+        </View>
+
+        <Pressable
+          style={({ pressed }) => [
+            styles.primaryButton,
+            pressed && styles.primaryButtonPressed,
+            prefSaving && styles.primaryButtonDisabled,
+          ]}
+          onPress={() =>
+            savePreferences({
+              home_city: homeCity.trim() || null,
+              home_state: homeState.trim() || null,
+              notifications_push: notifPush,
+              notifications_product: notifProduct,
+            })
+          }
+          disabled={prefSaving}
+        >
+          <Text style={styles.primaryButtonText}>
+            {prefSaving ? "Saving..." : "Save preferences"}
+          </Text>
+        </Pressable>
+      </View>
+
+      <Pressable
+        style={({ pressed }) => [styles.signOutButton, pressed && styles.signOutButtonPressed]}
+        onPress={handleSignOut}
+      >
+        <Text style={styles.signOutButtonText}>Sign out</Text>
+      </Pressable>
 
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Stats</Text>
@@ -239,6 +340,36 @@ const styles = StyleSheet.create({
     marginTop: spacing.sm,
     color: colors.textMuted,
     fontSize: 12
+  },
+  cityRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  cityInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  stateInput: {
+    width: 52,
+    marginBottom: 0,
+    textAlign: "center",
+  },
+  signOutButton: {
+    marginTop: spacing.lg,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.error,
+    alignItems: "center",
+    paddingVertical: spacing.sm
+  },
+  signOutButtonPressed: {
+    opacity: 0.7
+  },
+  signOutButtonText: {
+    color: colors.error,
+    fontSize: 14,
+    fontWeight: "600"
   },
   statsRow: {
     flexDirection: "row",

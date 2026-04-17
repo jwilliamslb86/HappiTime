@@ -6,24 +6,25 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { HappyHourCard } from "../components/HappyHourCard";
 import { useHappyHours, type HappyHourWindow } from "../hooks/useHappyHours";
 import { useUserFollowedVenues } from "../hooks/useUserFollowedVenues";
+import { useUserHistory, type HistoryEntry } from "../hooks/useUserHistory";
+import { useUserLists, type UserList } from "../hooks/useUserLists";
 import { useUserLocation } from "../hooks/useUserLocation";
 import { colors } from "../theme/colors";
 import { spacing } from "../theme/spacing";
 import { distanceMiles } from "../utils/location";
 
 export const FavoritesScreen: React.FC = () => {
-  const [tab, setTab] = useState<"favorites" | "activity" | "history">(
+  const [tab, setTab] = useState<"favorites" | "history" | "lists">(
     "favorites"
   );
   const { data } = useHappyHours();
   const { coords } = useUserLocation();
   const { venueIds: followedVenueIds, loading: followedLoading } =
     useUserFollowedVenues();
+  const { entries: historyEntries, loading: historyLoading } = useUserHistory();
+  const { lists, loading: listsLoading } = useUserLists();
 
-  // TODO: once you store favorites per user, filter here.
   const favoriteWindows = data;
-  // TODO: replace with real history data from Supabase when available.
-  const historyWindows: typeof favoriteWindows = [];
   const favoritesWithDistance = useMemo(() => {
     return favoriteWindows.map((window) => {
       if (typeof window.distance === "number") return window;
@@ -68,8 +69,8 @@ export const FavoritesScreen: React.FC = () => {
       <SegmentedTabs
         tabs={[
           { key: "favorites", label: "Favorites" },
-          { key: "activity", label: "Activity" },
-          { key: "history", label: "History" }
+          { key: "history", label: "History" },
+          { key: "lists", label: "Lists" }
         ]}
         activeKey={tab}
         onChange={(key) => setTab(key as any)}
@@ -101,27 +102,40 @@ export const FavoritesScreen: React.FC = () => {
         />
       )}
 
-      {tab === "activity" && (
-        <EmptyState
-          title="Activity is on the way"
-          message="Your recent happy hour visits and saves will show up here."
-        />
-      )}
-
       {tab === "history" && (
-        historyWindows.length > 0 ? (
+        historyLoading ? (
+          <LoadingSpinner />
+        ) : historyEntries.length > 0 ? (
           <FlatList
-            data={historyWindows}
-            keyExtractor={(item) => String(item.id)}
+            data={historyEntries}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <HappyHourCard window={item} onPress={() => {}} />
-            )}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            renderItem={({ item }) => <HistoryRow entry={item} />}
           />
         ) : (
           <EmptyState
             title="No history yet"
             message="Past spots you've checked out will appear here."
+          />
+        )
+      )}
+
+      {tab === "lists" && (
+        listsLoading ? (
+          <LoadingSpinner />
+        ) : lists.length > 0 ? (
+          <FlatList
+            data={lists}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            renderItem={({ item }) => <ListRow list={item} />}
+          />
+        ) : (
+          <EmptyState
+            title="No lists yet"
+            message="Tap the + tab to create your first list."
           />
         )
       )}
@@ -146,6 +160,77 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, message }) => (
   <View style={styles.placeholder}>
     <Text style={styles.placeholderTitle}>{title}</Text>
     <Text style={styles.placeholderText}>{message}</Text>
+  </View>
+);
+
+const EVENT_LABEL: Record<string, string> = {
+  venue_view: "Viewed",
+  venue_save: "Saved",
+  venue_checkin: "Checked in",
+};
+
+const formatHistoryDate = (iso: string) => {
+  const ts = Date.parse(iso);
+  if (Number.isNaN(ts)) return "";
+  const diffMs = Date.now() - ts;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays}d ago`;
+};
+
+type HistoryRowProps = { entry: HistoryEntry };
+
+const HistoryRow: React.FC<HistoryRowProps> = ({ entry }) => {
+  const venueName = entry.venue?.name ?? "Unknown venue";
+  const locationParts = [entry.venue?.city, entry.venue?.state].filter(Boolean);
+  const location = locationParts.join(", ");
+  const label = EVENT_LABEL[entry.event_type] ?? entry.event_type;
+
+  return (
+    <View style={styles.historyRow}>
+      <View style={styles.historyInitial}>
+        <Text style={styles.historyInitialText}>
+          {venueName.charAt(0).toUpperCase()}
+        </Text>
+      </View>
+      <View style={styles.historyText}>
+        <Text style={styles.historyVenue}>{venueName}</Text>
+        {location ? (
+          <Text style={styles.historyMeta}>{location}</Text>
+        ) : null}
+      </View>
+      <View style={styles.historyTrailing}>
+        <Text style={styles.historyLabel}>{label}</Text>
+        <Text style={styles.historyWhen}>{formatHistoryDate(entry.created_at)}</Text>
+      </View>
+    </View>
+  );
+};
+
+type ListRowProps = { list: UserList };
+
+const ListRow: React.FC<ListRowProps> = ({ list }) => (
+  <View style={styles.historyRow}>
+    <View style={[styles.historyInitial, styles.listIcon]}>
+      <Text style={styles.historyInitialText}>
+        {list.name.charAt(0).toUpperCase()}
+      </Text>
+    </View>
+    <View style={styles.historyText}>
+      <Text style={styles.historyVenue}>{list.name}</Text>
+      {list.description ? (
+        <Text style={styles.historyMeta}>{list.description}</Text>
+      ) : null}
+    </View>
+    <View style={styles.historyTrailing}>
+      <Text style={styles.historyLabel}>
+        {list.item_count} {list.item_count === 1 ? "venue" : "venues"}
+      </Text>
+      <Text style={styles.historyWhen}>
+        {list.visibility === "public" ? "Public" : "Private"}
+      </Text>
+    </View>
   </View>
 );
 
@@ -249,5 +334,63 @@ const styles = StyleSheet.create({
   nearbyText: {
     color: colors.textMuted,
     fontSize: 13
+  },
+  separator: {
+    height: 1,
+    backgroundColor: colors.border,
+    opacity: 0.6,
+    marginLeft: 56
+  },
+  historyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing.md
+  },
+  historyInitial: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: spacing.md
+  },
+  historyInitialText: {
+    color: colors.text,
+    fontWeight: "700",
+    fontSize: 15
+  },
+  historyText: {
+    flex: 1
+  },
+  historyVenue: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: "600"
+  },
+  historyMeta: {
+    color: colors.textMuted,
+    fontSize: 12,
+    marginTop: 2
+  },
+  historyTrailing: {
+    alignItems: "flex-end",
+    marginLeft: spacing.sm
+  },
+  historyLabel: {
+    color: colors.textMuted,
+    fontSize: 12,
+    fontWeight: "500"
+  },
+  historyWhen: {
+    color: colors.textMuted,
+    fontSize: 11,
+    marginTop: 2
+  },
+  listIcon: {
+    backgroundColor: colors.pillActiveBg ?? colors.surface,
+    borderColor: "transparent",
   }
 });
